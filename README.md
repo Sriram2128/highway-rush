@@ -47,7 +47,7 @@ On mobile devices, use the on-screen buttons.
 
 Play the game here:
 
-[HIGHWAY RUSH - Play Now](https://YOUR-USERNAME.github.io/highway-rush/)
+[HIGHWAY RUSH - Play Now](https://sriram2128.github.io/highway-rush/)
 
 ## 👨‍💻 Developer
 
