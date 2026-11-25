@@ -1,0 +1,1139 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HIGHWAY RUSH | Ultimate Racing</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    background: radial-gradient(circle at top, #172a46, #070c17 75%);
+    color: white;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 10px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+header h1 {
+    font-size: clamp(28px, 6vw, 44px);
+    letter-spacing: 5px;
+    color: #00eaff;
+    text-shadow: 0 0 15px #00cfff;
+}
+
+header p {
+    color: #91a7c5;
+    letter-spacing: 3px;
+    font-size: 11px;
+    margin-top: 5px;
+}
+
+.game-wrapper {
+    width: min(100%, 480px);
+    position: relative;
+    border: 2px solid #00d9ff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 0 35px #00aaff55;
+    background: #17202a;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background: #06101ddd;
+    text-align: center;
+    padding: 25px;
+    z-index: 3;
+}
+
+.overlay.hidden {
+    display: none;
+}
+
+.overlay h2 {
+    color: #00eaff;
+    font-size: 36px;
+    letter-spacing: 3px;
+    text-shadow: 0 0 20px #00bfff;
+    margin-bottom: 12px;
+}
+
+.overlay p {
+    color: #b8c9df;
+    line-height: 1.8;
+    margin-bottom: 18px;
+}
+
+button {
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: .2s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.main-btn {
+    background: linear-gradient(100deg, #00d9ff, #007bff);
+    color: #00111c;
+    padding: 15px 35px;
+    border-radius: 8px;
+    font-size: 17px;
+    letter-spacing: 2px;
+    box-shadow: 0 0 20px #00bfff66;
+}
+
+.main-btn:hover {
+    transform: scale(1.06);
+    box-shadow: 0 0 30px #00bfff;
+}
+
+.hud {
+    width: min(100%, 480px);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 12px 0;
+}
+
+.stat {
+    background: #142238;
+    border: 1px solid #294665;
+    border-radius: 9px;
+    padding: 10px 5px;
+    text-align: center;
+}
+
+.stat small {
+    color: #91a7c5;
+    font-size: 10px;
+    letter-spacing: 1px;
+}
+
+.stat strong {
+    display: block;
+    color: #00eaff;
+    font-size: 20px;
+    margin-top: 5px;
+}
+
+.nitro-section {
+    width: min(100%, 480px);
+    margin-bottom: 12px;
+}
+
+.nitro-label {
+    display: flex;
+    justify-content: space-between;
+    color: #a9c4e5;
+    font-size: 11px;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+}
+
+.nitro-track {
+    height: 10px;
+    background: #1b2b42;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+#nitroBar {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #00bfff, #a200ff);
+    box-shadow: 0 0 15px #00bfff;
+    transition: width .1s;
+}
+
+.controls {
+    width: min(100%, 480px);
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.control-group {
+    display: flex;
+    gap: 10px;
+}
+
+.control-btn {
+    width: 65px;
+    height: 58px;
+    border-radius: 12px;
+    background: #142b46;
+    border: 1px solid #00bfff;
+    color: #00eaff;
+    font-size: 24px;
+    box-shadow: 0 0 12px #00bfff33;
+}
+
+.control-btn:active {
+    background: #006caa;
+    transform: scale(.93);
+}
+
+#nitroBtn {
+    width: 90px;
+    color: #ffcf4a;
+    border-color: #ffae00;
+    font-size: 13px;
+    letter-spacing: 1px;
+}
+
+.instructions {
+    text-align: center;
+    color: #8094ad;
+    font-size: 12px;
+    line-height: 1.8;
+    margin-top: 18px;
+}
+
+.instructions b {
+    color: #00eaff;
+}
+
+@media(max-width: 400px) {
+    .control-btn {
+        width: 57px;
+        height: 54px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>HIGHWAY RUSH</h1>
+    <p>ULTIMATE ARCADE RACING EXPERIENCE</p>
+</header>
+
+<div class="hud">
+    <div class="stat">
+        <small>SCORE</small>
+        <strong id="score">0</strong>
+    </div>
+    <div class="stat">
+        <small>SPEED</small>
+        <strong id="speed">0</strong>
+    </div>
+    <div class="stat">
+        <small>BEST</small>
+        <strong id="best">0</strong>
+    </div>
+</div>
+
+<div class="game-wrapper">
+
+    <canvas id="gameCanvas" width="480" height="760"></canvas>
+
+    <div class="overlay" id="overlay">
+        <h2 id="overlayTitle">HIGHWAY RUSH</h2>
+
+        <p id="overlayText">
+            Race through traffic.<br>
+            Dodge cars. Activate Nitro.<br>
+            Become the highway champion!
+        </p>
+
+        <button class="main-btn" id="startBtn">
+            START RACING
+        </button>
+
+        <p style="margin-top:22px;font-size:12px">
+            ARROW KEYS / A-D TO DRIVE<br>
+            SPACE TO ACTIVATE NITRO<br>
+            P TO PAUSE
+        </p>
+    </div>
+
+</div>
+
+<div class="nitro-section">
+    <div class="nitro-label">
+        <span>⚡ NITRO POWER</span>
+        <span id="nitroText">100%</span>
+    </div>
+    <div class="nitro-track">
+        <div id="nitroBar"></div>
+    </div>
+</div>
+
+<div class="controls">
+
+    <div class="control-group">
+        <button class="control-btn" id="leftBtn">◀</button>
+        <button class="control-btn" id="rightBtn">▶</button>
+    </div>
+
+    <div class="control-group">
+        <button class="control-btn" id="pauseBtn">Ⅱ</button>
+        <button class="control-btn" id="nitroBtn">⚡ NITRO</button>
+    </div>
+
+</div>
+
+<div class="instructions">
+    <b>DESKTOP:</b> Arrow keys or A / D to steer<br>
+    <b>MOBILE:</b> Use the buttons below the game<br>
+    Avoid traffic and survive as long as possible!
+</div>
+
+<script>
+
+// ==========================================
+// 1. GAME SETUP
+// ==========================================
+
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+const W = canvas.width;
+const H = canvas.height;
+
+const road = {
+    x: 65,
+    width: 350,
+    lanes: 3
+};
+
+const laneWidth = road.width / road.lanes;
+
+let gameState = "menu";
+let score = 0;
+let speed = 0;
+let roadOffset = 0;
+let spawnTimer = 0;
+let nitro = 100;
+let nitroActive = false;
+let frameTime = 0;
+let lastTime = 0;
+let difficulty = 1;
+
+let bestScore = Number(localStorage.getItem("highwayBest")) || 0;
+
+document.getElementById("best").textContent = bestScore;
+
+// ==========================================
+// 2. PLAYER
+// ==========================================
+
+const player = {
+    x: W / 2 - 25,
+    y: H - 135,
+    width: 50,
+    height: 90,
+    color: "#ff263f",
+    moveSpeed: 340
+};
+
+let traffic = [];
+let particles = [];
+let rain = [];
+
+const keys = {
+    left: false,
+    right: false,
+    nitro: false
+};
+
+// ==========================================
+// 3. AUDIO SYSTEM
+// ==========================================
+
+let audioContext = null;
+let soundEnabled = true;
+
+function playSound(frequency, duration, type = "sine", volume = 0.05) {
+    if (!soundEnabled) return;
+
+    try {
+        if (!audioContext) {
+            audioContext = new (
+                window.AudioContext ||
+                window.webkitAudioContext
+            )();
+        }
+
+        if (audioContext.state === "suspended") {
+            audioContext.resume();
+        }
+
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+
+        oscillator.type = type;
+        oscillator.frequency.value = frequency;
+
+        gain.gain.setValueAtTime(volume, audioContext.currentTime);
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.001,
+            audioContext.currentTime + duration
+        );
+
+        oscillator.connect(gain);
+        gain.connect(audioContext.destination);
+
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + duration);
+
+    } catch (error) {
+        console.log("Audio unavailable");
+    }
+}
+
+// ==========================================
+// 4. BACKGROUND
+// ==========================================
+
+function drawBackground() {
+
+    const bg = ctx.createLinearGradient(0, 0, W, H);
+
+    bg.addColorStop(0, "#10251e");
+    bg.addColorStop(1, "#071510");
+
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // Grass details
+
+    ctx.fillStyle = "#193b2c";
+
+    for (let i = 0; i < 30; i++) {
+
+        let y = (i * 100 + roadOffset * 0.7) % H;
+
+        ctx.fillRect(10, y, 35, 4);
+        ctx.fillRect(W - 45, y + 30, 35, 4);
+    }
+
+    // Road surface
+
+    const roadGradient = ctx.createLinearGradient(
+        road.x, 0, road.x + road.width, 0
+    );
+
+    roadGradient.addColorStop(0, "#343b46");
+    roadGradient.addColorStop(0.5, "#50545c");
+    roadGradient.addColorStop(1, "#343b46");
+
+    ctx.fillStyle = roadGradient;
+    ctx.fillRect(road.x, 0, road.width, H);
+
+    // Road borders
+
+    ctx.fillStyle = "#f4f4f4";
+
+    ctx.fillRect(road.x, 0, 6, H);
+    ctx.fillRect(road.x + road.width - 6, 0, 6, H);
+
+    // Roadside glowing strips
+
+    ctx.fillStyle = "#00bfff";
+
+    ctx.fillRect(road.x - 5, 0, 3, H);
+    ctx.fillRect(road.x + road.width + 2, 0, 3, H);
+
+    // Lane markings
+
+    ctx.fillStyle = "#ffffff";
+
+    for (let lane = 1; lane < road.lanes; lane++) {
+
+        const x = road.x + lane * laneWidth - 2;
+
+        for (let y = -100; y < H + 100; y += 110) {
+
+            const position = (y + roadOffset) % (H + 110);
+
+            ctx.fillRect(x, position, 4, 55);
+        }
+    }
+
+    // Roadside lights
+
+    for (let i = 0; i < 12; i++) {
+
+        const y = (i * 100 + roadOffset * 1.3) % H;
+
+        ctx.fillStyle = "#00d9ff";
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = "#00d9ff";
+
+        ctx.beginPath();
+        ctx.arc(48, y, 3, 0, Math.PI * 2);
+        ctx.arc(432, y, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+    }
+}
+
+// ==========================================
+// 5. CAR DRAWING
+// ==========================================
+
+function drawCar(x, y, color, isPlayer = false) {
+
+    ctx.save();
+
+    ctx.translate(x, y);
+
+    // Wheels
+
+    ctx.fillStyle = "#090b10";
+
+    ctx.fillRect(-5, 14, 10, 23);
+    ctx.fillRect(45, 14, 10, 23);
+
+    ctx.fillRect(-5, 60, 10, 22);
+    ctx.fillRect(45, 60, 10, 22);
+
+    // Main body gradient
+
+    const gradient = ctx.createLinearGradient(0, 0, 50, 0);
+
+    gradient.addColorStop(0, "#151515");
+    gradient.addColorStop(0.25, color);
+    gradient.addColorStop(0.75, color);
+    gradient.addColorStop(1, "#151515");
+
+    ctx.fillStyle = gradient;
+
+    ctx.beginPath();
+
+    ctx.roundRect(0, 0, 50, 90, 12);
+
+    ctx.fill();
+
+    // Front windshield
+
+    ctx.fillStyle = "#8be9ff";
+
+    ctx.beginPath();
+    ctx.roundRect(8, 12, 34, 24, 5);
+    ctx.fill();
+
+    // Rear windshield
+
+    ctx.fillStyle = "#142b3e";
+
+    ctx.beginPath();
+    ctx.roundRect(8, 54, 34, 20, 5);
+    ctx.fill();
+
+    // Roof detail
+
+    ctx.fillStyle = "#ffffff33";
+    ctx.fillRect(23, 40, 4, 10);
+
+    // Headlights
+
+    ctx.fillStyle = "#ffffff";
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = "#ffffff";
+
+    ctx.fillRect(5, 3, 9, 5);
+    ctx.fillRect(36, 3, 9, 5);
+
+    ctx.shadowBlur = 0;
+
+    // Rear lights
+
+    ctx.fillStyle = "#ff142e";
+    ctx.fillRect(5, 81, 9, 5);
+    ctx.fillRect(36, 81, 9, 5);
+
+    if (isPlayer) {
+
+        // Nitro glow
+
+        ctx.fillStyle = "#00eaff";
+        ctx.shadowBlur = 18;
+        ctx.shadowColor = "#00eaff";
+
+        ctx.fillRect(10, 88, 8, 9);
+        ctx.fillRect(32, 88, 8, 9);
+
+        ctx.shadowBlur = 0;
+    }
+
+    ctx.restore();
+}
+
+// ==========================================
+// 6. TRAFFIC GENERATOR
+// ==========================================
+
+const carColors = [
+    "#ffb000",
+    "#00d9ff",
+    "#a855f7",
+    "#ffffff",
+    "#22dd88",
+    "#ff7043"
+];
+
+function spawnTraffic() {
+
+    const lane = Math.floor(Math.random() * road.lanes);
+
+    const x = road.x + lane * laneWidth + laneWidth / 2 - 25;
+
+    // Avoid spawning overlapping traffic
+
+    const blocked = traffic.some(car =>
+        Math.abs(car.x - x) < 60 && car.y < 170
+    );
+
+    if (blocked) return;
+
+    traffic.push({
+        x: x,
+        y: -110,
+        width: 50,
+        height: 90,
+        speed: 0.75 + Math.random() * 0.5,
+        color: carColors[
+            Math.floor(Math.random() * carColors.length)
+        ]
+    });
+}
+
+// ==========================================
+// 7. PARTICLE EFFECTS
+// ==========================================
+
+function createParticles(x, y, color, amount = 12) {
+
+    for (let i = 0; i < amount; i++) {
+
+        particles.push({
+            x: x,
+            y: y,
+            vx: (Math.random() - 0.5) * 240,
+            vy: (Math.random() - 0.5) * 240,
+            life: 0.7 + Math.random() * 0.5,
+            color: color,
+            size: 2 + Math.random() * 5
+        });
+    }
+}
+
+function updateParticles(dt) {
+
+    particles.forEach(p => {
+
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+
+        p.life -= dt;
+
+    });
+
+    particles = particles.filter(p => p.life > 0);
+}
+
+function drawParticles() {
+
+    particles.forEach(p => {
+
+        ctx.globalAlpha = Math.min(1, p.life);
+
+        ctx.fillStyle = p.color;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+
+    });
+
+    ctx.globalAlpha = 1;
+}
+
+// ==========================================
+// 8. RAIN EFFECT
+// ==========================================
+
+function createRain() {
+
+    rain = [];
+
+    for (let i = 0; i < 100; i++) {
+
+        rain.push({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            length: 10 + Math.random() * 20,
+            speed: 250 + Math.random() * 350
+        });
+    }
+}
+
+function updateRain(dt) {
+
+    rain.forEach(drop => {
+
+        drop.y += drop.speed * dt;
+
+        if (drop.y > H) {
+            drop.y = -30;
+            drop.x = Math.random() * W;
+        }
+    });
+}
+
+function drawRain() {
+
+    ctx.strokeStyle = "#a9dfff55";
+    ctx.lineWidth = 1;
+
+    rain.forEach(drop => {
+
+        ctx.beginPath();
+
+        ctx.moveTo(drop.x, drop.y);
+
+        ctx.lineTo(
+            drop.x - 4,
+            drop.y + drop.length
+        );
+
+        ctx.stroke();
+    });
+}
+
+// ==========================================
+// 9. COLLISION DETECTION
+// ==========================================
+
+function collision(a, b) {
+
+    const padding = 10;
+
+    return (
+        a.x + padding < b.x + b.width - padding &&
+        a.x + a.width - padding > b.x + padding &&
+        a.y + padding < b.y + b.height - padding &&
+        a.y + a.height - padding > b.y + padding
+    );
+}
+
+// ==========================================
+// 10. GAME START
+// ==========================================
+
+function startGame() {
+
+    score = 0;
+    speed = 260;
+    nitro = 100;
+
+    traffic = [];
+    particles = [];
+
+    spawnTimer = 0;
+    roadOffset = 0;
+    difficulty = 1;
+
+    player.x = W / 2 - 25;
+
+    keys.left = false;
+    keys.right = false;
+    keys.nitro = false;
+
+    gameState = "playing";
+
+    document.getElementById("overlay").classList.add("hidden");
+
+    playSound(500, 0.2, "square");
+
+    lastTime = performance.now();
+}
+
+function pauseGame() {
+
+    if (gameState === "playing") {
+
+        gameState = "paused";
+
+        showOverlay(
+            "GAME PAUSED",
+            "Take a break.<br>Ready for another race?",
+            "RESUME"
+        );
+
+    } else if (gameState === "paused") {
+
+        gameState = "playing";
+
+        document.getElementById("overlay").classList.add("hidden");
+
+        lastTime = performance.now();
+    }
+}
+
+// ==========================================
+// 11. GAME OVER
+// ==========================================
+
+function gameOver() {
+
+    gameState = "gameover";
+
+    playSound(100, 0.6, "sawtooth", 0.1);
+
+    createParticles(
+        player.x + 25,
+        player.y + 45,
+        "#ff4b4b",
+        35
+    );
+
+    if (score > bestScore) {
+
+        bestScore = score;
+
+        localStorage.setItem("highwayBest", bestScore);
+
+        document.getElementById("best").textContent = bestScore;
+    }
+
+    showOverlay(
+        "RACE OVER!",
+        `YOUR SCORE: ${Math.floor(score)}<br>
+         BEST SCORE: ${bestScore}<br>
+         Better luck next time!`,
+        "RACE AGAIN"
+    );
+}
+
+function showOverlay(title, text, buttonText) {
+
+    document.getElementById("overlayTitle").textContent = title;
+
+    document.getElementById("overlayText").innerHTML = text;
+
+    document.getElementById("startBtn").textContent = buttonText;
+
+    document.getElementById("overlay").classList.remove("hidden");
+}
+
+// ==========================================
+// 12. GAME UPDATE
+// ==========================================
+
+function update(dt) {
+
+    if (gameState !== "playing") return;
+
+    dt = Math.min(dt, 0.04);
+
+    difficulty = 1 + score / 1200;
+
+    let currentSpeed = speed * difficulty;
+
+    nitroActive = keys.nitro && nitro > 0;
+
+    if (nitroActive) {
+
+        currentSpeed *= 1.8;
+
+        nitro -= 32 * dt;
+
+        createParticles(
+            player.x + 25,
+            player.y + 92,
+            "#00eaff",
+            2
+        );
+
+    } else {
+
+        nitro += 8 * dt;
+    }
+
+    nitro = Math.max(0, Math.min(100, nitro));
+
+    // Player movement
+
+    if (keys.left) {
+        player.x -= player.moveSpeed * dt;
+    }
+
+    if (keys.right) {
+        player.x += player.moveSpeed * dt;
+    }
+
+    // Keep car inside road
+
+    player.x = Math.max(
+        road.x + 8,
+        Math.min(
+            road.x + road.width - player.width - 8,
+            player.x
+        )
+    );
+
+    // Road movement
+
+    roadOffset += currentSpeed * dt;
+
+    if (roadOffset > H) roadOffset = 0;
+
+    // Traffic spawning
+
+    spawnTimer -= dt;
+
+    if (spawnTimer <= 0) {
+
+        spawnTraffic();
+
+        spawnTimer = Math.max(
+            0.45,
+            1.15 - difficulty * 0.055
+        );
+    }
+
+    // Traffic movement
+
+    traffic.forEach(car => {
+
+        car.y += currentSpeed * car.speed * dt;
+
+        if (collision(player, car)) {
+
+            gameOver();
+        }
+
+    });
+
+    // Remove passed cars
+
+    traffic = traffic.filter(car => car.y < H + 120);
+
+    // Score
+
+    score += dt * 12 * difficulty;
+
+    // Nitro and rain
+
+    updateParticles(dt);
+    updateRain(dt);
+
+    // Update dashboard
+
+    document.getElementById("score").textContent =
+        Math.floor(score);
+
+    document.getElementById("speed").textContent =
+        Math.floor(currentSpeed / 5);
+
+    document.getElementById("nitroBar").style.width =
+        nitro + "%";
+
+    document.getElementById("nitroText").textContent =
+        Math.floor(nitro) + "%";
+}
+
+// ==========================================
+// 13. GAME RENDERING
+// ==========================================
+
+function draw() {
+
+    drawBackground();
+
+    // Draw traffic
+
+    traffic.forEach(car => {
+
+        drawCar(car.x, car.y, car.color);
+    });
+
+    // Player car
+
+    if (gameState !== "gameover") {
+
+        drawCar(
+            player.x,
+            player.y,
+            player.color,
+            true
+        );
+    }
+
+    drawParticles();
+
+    drawRain();
+
+    // Nitro screen glow
+
+    if (nitroActive && gameState === "playing") {
+
+        ctx.strokeStyle = "#00d9ff";
+        ctx.lineWidth = 5;
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = "#00d9ff";
+
+        ctx.strokeRect(3, 3, W - 6, H - 6);
+
+        ctx.shadowBlur = 0;
+    }
+}
+
+// ==========================================
+// 14. MAIN GAME LOOP
+// ==========================================
+
+function gameLoop(timestamp) {
+
+    const dt = lastTime
+        ? (timestamp - lastTime) / 1000
+        : 0;
+
+    lastTime = timestamp;
+
+    update(dt);
+    draw();
+
+    requestAnimationFrame(gameLoop);
+}
+
+// ==========================================
+// 15. KEYBOARD CONTROLS
+// ==========================================
+
+document.addEventListener("keydown", e => {
+
+    if (
+        ["ArrowLeft", "ArrowRight", " "].includes(e.key)
+    ) {
+        e.preventDefault();
+    }
+
+    if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") {
+        keys.left = true;
+    }
+
+    if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") {
+        keys.right = true;
+    }
+
+    if (e.code === "Space") {
+        keys.nitro = true;
+    }
+
+    if (e.key.toLowerCase() === "p" && !e.repeat) {
+        pauseGame();
+    }
+});
+
+document.addEventListener("keyup", e => {
+
+    if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") {
+        keys.left = false;
+    }
+
+    if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") {
+        keys.right = false;
+    }
+
+    if (e.code === "Space") {
+        keys.nitro = false;
+    }
+});
+
+// ==========================================
+// 16. MOBILE CONTROLS
+// ==========================================
+
+function holdButton(id, key) {
+
+    const btn = document.getElementById(id);
+
+    btn.addEventListener("pointerdown", e => {
+
+        e.preventDefault();
+
+        keys[key] = true;
+    });
+
+    ["pointerup", "pointerleave", "pointercancel"].forEach(event => {
+
+        btn.addEventListener(event, () => {
+
+            keys[key] = false;
+        });
+    });
+}
+
+holdButton("leftBtn", "left");
+holdButton("rightBtn", "right");
+holdButton("nitroBtn", "nitro");
+
+// ==========================================
+// 17. BUTTON EVENTS
+// ==========================================
+
+document.getElementById("startBtn").addEventListener("click", () => {
+
+    if (gameState === "paused") {
+
+        gameState = "playing";
+
+        document.getElementById("overlay").classList.add("hidden");
+
+        lastTime = performance.now();
+
+    } else {
+
+        startGame();
+    }
+});
+
+document.getElementById("pauseBtn").addEventListener("click", pauseGame);
+
+// ==========================================
+// 18. INITIALIZATION
+// ==========================================
+
+createRain();
+
+requestAnimationFrame(gameLoop);
+
+</script>
+
+</body>
+</html>
